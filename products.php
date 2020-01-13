@@ -2,11 +2,8 @@
 require_once 'common.php';
 
 
-
 if (isset($_GET['delete'])) {
     $del = $_GET['delete'];
-    //$sql = "DELETE FROM Products WHERE id = $del";
-    //print_r($sql); die();
     $stmt = $conn->prepare("DELETE FROM Products WHERE id=$del");
     $stmt->execute(array($del));
     header("Location: products.php");
@@ -31,7 +28,7 @@ $rows = $stmt->fetchAll();
                     <?= $row['price'] ?> <br />
                 </td>
                 <td>
-                    <a href="products.php?edit=<?= $row['id'] ?>"><?= trans('Edit') ?></a>
+                    <a href="product.php?edit=<?= $row['id'] ?>"><?= trans('Edit') ?></a>
                 </td>
                 <td>
                     <a href="products.php?delete=<?= $row['id'] ?>"><?= trans('Delete') ?></a>
