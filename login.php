@@ -22,7 +22,7 @@ if (isset($_POST['submit'])) {
         if (ADMIN !== $username OR PASS !== $password) { //password_verify($username, $hash)
             echo $mess = "Invalid Username or Password!";
         } else {
-            header("Location: index.php");
+            header("Location: products.php");
             exit();
         }
     } else {
