@@ -18,8 +18,7 @@ if (isset($_POST['submit'])) {
     }
 
     if (empty($data_missing)) {
-        //$hash = password_hash(PASS, PASSWORD_DEFAULT);
-        if (ADMIN !== $username OR PASS !== $password) { //password_verify($username, $hash)
+        if (ADMIN !== $username OR PASS !== $password) {
             echo $mess = "Invalid Username or Password!";
         } else {
             header("Location: products.php");
@@ -27,19 +26,20 @@ if (isset($_POST['submit'])) {
         }
     } else {
         echo "You need to enter: ";
-        foreach($data_missing as $missing){
+        foreach ($data_missing as $missing) {
             echo $missing . ', ';
         }
     }
 }
 ?>
 <html>
-    <head></head>
-    <body>
-        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-            <input type="text" name="username" placeholder="Username" value="<?php echo isset($_POST['username']) ? $_POST['username'] : '' ?>" /><br /><br />
-            <input type="password" name="password" placeholder="Password" /><br /><br />
-            <input type="submit" name="submit" value="LOGIN" />
-        </form>
-    </body>
+<head></head>
+<body>
+<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+    <input type="text" name="username" placeholder="Username"
+           value="<?php echo isset($_POST['username']) ? $_POST['username'] : '' ?>"/><br/><br/>
+    <input type="password" name="password" placeholder="Password"/><br/><br/>
+    <input type="submit" name="submit" value="Login"/>
+</form>
+</body>
 </html>
