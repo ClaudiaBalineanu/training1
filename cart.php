@@ -60,14 +60,14 @@ if (isset($_POST['submit'])) {
     if ($subject and $from and $message) {
         // need a mail server
         $mail = mail(TO, $subject, $message, $headers);
+        print_r($mail);die();
     }
 
     if (isset($mail)) {
         session_unset();
         // or can be redirected to products page (index.php)
         header("Location: cart.php");
-    } else {
-        $mess = "Error";
+        exit();
     }
 }
 ?>
