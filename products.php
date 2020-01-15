@@ -1,11 +1,9 @@
 <?php
 require_once 'common.php';
 
-
-if (isset($_GET['delete'])) {
-    $del = $_GET['delete'];
-    $stmt = $conn->prepare("DELETE FROM Products WHERE id=$del");
-    $stmt->execute(array($del));
+if (isset($_GET['id'])) {
+    $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
+    $stmt->execute(array($_GET['id']));
     header("Location: products.php");
 }
 $stmt = $conn->prepare("SELECT * FROM Products");
@@ -20,18 +18,18 @@ $rows = $stmt->fetchAll();
         <?php foreach ($rows as $row): ?>
             <tr>
                 <td>
-                    <img src="images/<?= $row['image'] ?>" width="100" height="100" alt="Image product">
+                    <img src="images/<?= $row['image'] ?>" width="100" height="100" alt="<?= trans('Image product') ?>">
                 </td>
                 <td>
-                    <?= $row['title'] ?> <br />
-                    <?= $row['description'] ?> <br />
-                    <?= $row['price'] ?> <br />
+                    <?= $row['title'] ?> <br/>
+                    <?= $row['description'] ?> <br/>
+                    <?= $row['price'] ?> <br/>
                 </td>
                 <td>
-                    <a href="product.php?edit=<?= $row['id'] ?>"><?= trans('Edit') ?></a>
+                    <a href="product.php?id=<?= $row['id'] ?>"><?= trans('Edit') ?></a>
                 </td>
                 <td>
-                    <a href="products.php?delete=<?= $row['id'] ?>"><?= trans('Delete') ?></a>
+                    <a href="products.php?id=<?= $row['id'] ?>"><?= trans('Delete') ?></a>
                 </td>
             </tr>
         <?php endforeach; ?>
