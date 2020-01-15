@@ -3,20 +3,20 @@ require_once 'common.php';
 
 session_start();
 
-if (! isset($_SESSION['cart']) or $_SESSION['cart']==null) {
+if (!count($_SESSION['cart'])) {
     echo 'NO PRODUCTS IN CART';
 } else {
-
-    if (isset($_GET['cart'])) {
-        $key = array_search($_GET['cart'], $_SESSION['cart']);
+    if (isset($_GET['id'])) {
+        $key = array_search($_GET['id'], $_SESSION['cart']);
         unset($_SESSION['cart'][$key]);
+        $_SESSION['cart'] = array_values($_SESSION['cart']);
+        header("Location: cart.php");
     }
-
-    $ids = $_SESSION['cart'];
-    $arr = array_fill(0, count($ids), '?');
+    $arr = array_fill(0, count($_SESSION['cart']), '?');
     $qMarks = implode(',', $arr);
-    $stmt = $conn->prepare("SELECT * FROM  Products WHERE id IN($qMarks)");
-    $stmt->execute($ids);
+    $sql = "SELECT * FROM  Products WHERE id IN($qMarks)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($_SESSION['cart']);
     $rows = $stmt->fetchAll();
 }
 
@@ -50,7 +50,7 @@ if (isset($_POST['submit'])) {
     $from = strip_tags($_POST['email']);
     $headers = "From:" . $from;
 
-    if (! empty($_SESSION['cart'])) {
+    if (!empty($_SESSION['cart'])) {
         foreach ($rows as $row) {
             $arr[] = $row['title'];
             $message = implode(',', $arr);
@@ -58,53 +58,53 @@ if (isset($_POST['submit'])) {
     }
 
     if ($subject and $from and $message) {
+        // need a mail server
         $mail = mail(TO, $subject, $message, $headers);
     }
 
     if (isset($mail)) {
-        $mess = "Email send";
-        // if the message was sent to redirect to the page with products
-        //header('Location: index.php');
-        //exit();
+        session_unset();
+        // or can be redirected to products page (index.php)
+        header("Location: cart.php");
     } else {
         $mess = "Error";
     }
 }
 ?>
 <html>
-    <head></head>
-    <body>
-        <table>
-            <?php if (! empty($rows) && count($rows) > 0): ?>
-                <?php foreach ($rows as $row): ?>
-                    <tr>
-                        <td>
-                            <img src="images/<?= $row['image'] ?>" width="100" height="100" alt="Image product">
-                        </td>
-                        <td>
-                            <?= $row['title'] ?> <br />
-                            <?= $row['description'] ?> <br />
-                            <?= $row['price'] ?> <br />
-                        </td>
-                        <td>
-                            <a href="cart.php?cart=<?= $row['id'] ?>"><?= trans('Remove') ?></a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </table>
-        <br />
-        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-            <input type="text" name="name" placeholder="Name" value="<?php echo isset($_POST['name']) ? $_POST['name'] : '' ?>" />
-            <span class="error">* <?php echo $nameErr;?></span><br /><br />
-            <input type="email" name="email" placeholder="Email" value="<?php echo isset($_POST['email']) ? $_POST['email'] : '' ?>" />
-            <span class="error">* <?php echo $emailErr;?></span><br /><br />
-            <textarea name="comment" cols="20" rows="7"  placeholder="Comment"></textarea><br /><br />
-            <input type="submit" name="submit" value="Checkout">
-        </form>
-
-        <a href="index.php"><?= trans('Go to products') ?></a>
-        <!--  -->
-        <p><?= $mess ?></p>
-    </body>
+<head></head>
+<body>
+<table>
+    <?php if (!empty($rows) && count($rows) > 0): ?>
+        <?php foreach ($rows as $row): ?>
+            <tr>
+                <td>
+                    <img src="images/<?= $row['image'] ?>" width="100" height="100"
+                         alt="<?= trans('Image product') ?>">
+                </td>
+                <td>
+                    <?= $row['title'] ?> <br/>
+                    <?= $row['description'] ?> <br/>
+                    <?= $row['price'] ?> <br/>
+                </td>
+                <td>
+                    <a href="cart.php?id=<?= $row['id'] ?>"><?= trans('Remove') ?></a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</table>
+<br/>
+<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+    <input type="text" name="name" placeholder="<?= trans('Name') ?>"
+           value="<?php echo isset($_POST['name']) ? $_POST['name'] : '' ?>"/>
+    <span class="error">* <?php echo $nameErr; ?></span><br/><br/>
+    <input type="email" name="email" placeholder="<?= trans('Email') ?>"
+           value="<?php echo isset($_POST['email']) ? $_POST['email'] : '' ?>"/>
+    <span class="error">* <?php echo $emailErr; ?></span><br/><br/>
+    <textarea name="comment" cols="20" rows="7" placeholder="<?= trans('Comment') ?>"></textarea><br/><br/>
+    <input type="submit" name="submit" value="<?= trans('Checkout') ?>">
+</form>
+<a href="index.php"><?= trans('Go to products') ?></a>
+</body>
 </html>
