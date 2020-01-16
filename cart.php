@@ -60,7 +60,6 @@ if (isset($_POST['submit'])) {
     if ($subject and $from and $message) {
         // need a mail server
         $mail = mail(TO, $subject, $message, $headers);
-        print_r($mail);die();
     }
 
     if (isset($mail)) {
