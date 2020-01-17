@@ -1,14 +1,26 @@
 <?php
 require_once 'common.php';
 
-if (isset($_GET['id'])) {
-    $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
-    $stmt->execute(array($_GET['id']));
-    header("Location: products.php");
+session_start();
+
+if (isset($_SESSION['admin']) && $_SESSION['admin'][0] == PASS) {
+
+    session_destroy();
+
+    if (isset($_GET['id'])) {
+        $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
+        $stmt->execute(array($_GET['id']));
+        header("Location: products.php");
+        exit();
+    }
+    $stmt = $conn->prepare("SELECT * FROM Products");
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+} else {
+    header("Location: login.php");
+    exit();
 }
-$stmt = $conn->prepare("SELECT * FROM Products");
-$stmt->execute();
-$rows = $stmt->fetchAll();
+
 ?>
 <html>
 <head></head>
@@ -41,3 +53,5 @@ $rows = $stmt->fetchAll();
 <a href="login.php"><?= trans('Logout') ?></a>
 </body>
 </html>
+<?php
+session_destroy();
