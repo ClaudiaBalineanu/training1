@@ -1,10 +1,12 @@
 <?php
-require_once 'config.php';
+//require_once 'config.php';
 require_once 'common.php';
 
 session_start();
 
-if (!isset($_SESSION['admin'])) {
+if (isset($_SESSION['admin'])) {
+    session_unset();
+} else {
     $_SESSION['admin'] = array();
 }
 
@@ -29,11 +31,15 @@ if (isset($_POST['submit'])) {
     }
 
     if (empty($errors)) {
-        $_SESSION['admin'][] = $password;
-        header("Location: products.php");
-        exit();
+        if (ADMIN == $username && PASS == $password) {
+            $_SESSION['admin'] = $password;
+            $_SESSION['start'] = time();
+            // Ending a session in 30 minutes from the starting time.
+            $_SESSION['expire'] = $_SESSION['start'] + (30 * 60);
+            header("Location: products.php");
+            exit();
+        }
     } else {
-        echo "";
         foreach ($errors as $error) {
             echo $error;
         }
