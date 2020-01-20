@@ -3,24 +3,29 @@ require_once 'common.php';
 
 session_start();
 
-if (isset($_SESSION['admin']) && $_SESSION['admin'][0] == PASS) {
-
-    session_destroy();
-
-    if (isset($_GET['id'])) {
-        $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
-        $stmt->execute(array($_GET['id']));
-        header("Location: products.php");
+if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
+    $now = time();
+    if ($now > $_SESSION['expire']) {
+        session_destroy();
+        // session has expired! redirect to login
+        header("Location: login.php");
         exit();
+    } else {
+        if (isset($_GET['id'])) {
+            $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
+            $stmt->execute(array($_GET['id']));
+            //when delete to refresh the page
+            header("Location: products.php");
+            exit();
+        }
+        $stmt = $conn->prepare("SELECT * FROM Products");
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
     }
-    $stmt = $conn->prepare("SELECT * FROM Products");
-    $stmt->execute();
-    $rows = $stmt->fetchAll();
 } else {
     header("Location: login.php");
     exit();
 }
-
 ?>
 <html>
 <head></head>
@@ -53,5 +58,3 @@ if (isset($_SESSION['admin']) && $_SESSION['admin'][0] == PASS) {
 <a href="login.php"><?= trans('Logout') ?></a>
 </body>
 </html>
-<?php
-session_destroy();
