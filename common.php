@@ -10,7 +10,15 @@ try {
     echo "Connection failed: " . $e->getMessage();
 }
 
+session_start();
+
 function trans($label)
 {
     return $label;
+}
+
+function redirect($page)
+{
+    header("Location: $page");
+    exit();
 }
