@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 // the file with the connection to the database
 require_once 'common.php';
 
@@ -11,6 +9,7 @@ if (!isset($_SESSION['cart'])) {
 // if is already in the session, don't insert again
 if (isset($_GET['id']) && !in_array($_GET['id'], $_SESSION['cart'])) {
     $_SESSION['cart'][] = $_GET['id'];
+    redirect('index.php');
 }
 
 if (!count($_SESSION['cart'])) {
