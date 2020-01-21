@@ -2,8 +2,6 @@
 //require_once 'config.php';
 require_once 'common.php';
 
-session_start();
-
 if (isset($_SESSION['admin'])) {
     session_unset();
 } else {
@@ -15,29 +13,30 @@ if (isset($_POST['submit'])) {
     $errors = array();
 
     if (empty($_POST['username'])) {
-        $errors[] = 'Insert Username! ';
+        $errors[] = trans('Insert Username! ');
     } elseif (ADMIN !== $_POST['username']) {
-        $errors[] = "Invalid Username! ";
+        $errors[] = trans("Invalid Username! ");
     } else {
         $username = strip_tags($_POST['username']);
     }
 
     if (empty($_POST['password'])) {
-        $errors[] = 'Insert Password! ';
+        $errors[] = trans('Insert Password! ');
     } elseif (PASS !== $_POST['password']) {
-        $errors[] = "Invalid Password! ";
+        $errors[] = trans("Invalid Password! ");
     } else {
         $password = strip_tags($_POST['password']);
     }
 
     if (empty($errors)) {
         if (ADMIN == $username && PASS == $password) {
+            // set session admin with the password
             $_SESSION['admin'] = $password;
+            // get the time in seconds
             $_SESSION['start'] = time();
-            // Ending a session in 30 minutes from the starting time.
+            // ending a session in 30 minutes from the starting time.
             $_SESSION['expire'] = $_SESSION['start'] + (30 * 60);
-            header("Location: products.php");
-            exit();
+            redirect('products.php');
         }
     } else {
         foreach ($errors as $error) {
