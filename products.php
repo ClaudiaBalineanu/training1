@@ -1,6 +1,6 @@
 <?php
 require_once 'common.php';
-
+echo "";
 if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
     // get the time when the products page is accessed in seconds
     $now = time();
