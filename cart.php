@@ -1,13 +1,12 @@
 <?php
 require_once 'common.php';
-
 if (isset($_SESSION['cart'])) {
     if (count($_SESSION['cart'])) {
         if (isset($_GET['id'])) {
             $keySession = array_search($_GET['id'], $_SESSION['cart']);
             if (isset($keySession)) {
                 unset($_SESSION['cart'][$keySession]);
-                // remake the session array (in unset 2=>2, the 3=>3 will become 2=>3)
+                // remake the session array (if unset 2=>2, the 3=>3 will become 2=>3)
                 $_SESSION['cart'] = array_values($_SESSION['cart']);
             }
             redirect('cart.php');
@@ -20,7 +19,7 @@ if (isset($_SESSION['cart'])) {
             $rows = $stmt->fetchAll();
         }
     } else {
-        $mess = trans('NO PRODUCTS IN CART');
+        $mess = trans('No products in cart!');
     }
 } else {
     $mess = trans('Successful checkout!');
