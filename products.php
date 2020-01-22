@@ -1,25 +1,18 @@
 <?php
 require_once 'common.php';
-echo "";
+
+setcookie(session_name(), session_id(), time() + (30 * 60));
+
 if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
-    // get the time when the products page is accessed in seconds
-    $now = time();
-    // when session expire is < than the now (the 30 minutes have passed) destroy the session
-    if ($now > $_SESSION['expire']) {
-        session_destroy();
-        // session has expired! redirect to login
-        redirect('login.php');
-    } else {
-        if (isset($_GET['id'])) {
-            $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
-            $stmt->execute(array($_GET['id']));
-            //when delete to refresh the page
-            redirect('products.php');
-        }
-        $stmt = $conn->prepare("SELECT * FROM Products");
-        $stmt->execute();
-        $rows = $stmt->fetchAll();
+    if (isset($_GET['id'])) {
+        $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
+        $stmt->execute(array($_GET['id']));
+        //when delete to refresh the page
+        redirect('products.php');
     }
+    $stmt = $conn->prepare("SELECT * FROM Products");
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
 } else {
     redirect('login.php');
 }
