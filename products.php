@@ -5,7 +5,8 @@ setcookie(session_name(), session_id(), time() + (30 * 60));
 
 if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
     if (isset($_GET['id'])) {
-        $stmt = $conn->prepare("DELETE FROM Products WHERE id=" . $_GET['id']);
+        $stmt = $conn->prepare("DELETE FROM Products WHERE id=?");
+        $stmt->bindParam(1,$_GET['id'],PDO::PARAM_INT);
         $stmt->execute(array($_GET['id']));
         //when delete to refresh the page
         redirect('products.php');
