@@ -5,15 +5,17 @@ if (isset($_GET['id'])) {
     $sql = "SELECT op.order_id, o.name_cust, o.email, op.product_id, p.id, p.title, p.description, p.price, p.image FROM products p 
                 INNER JOIN order_product op ON p.id=op.product_id 
                 INNER JOIN orders o ON op.order_id=o.id 
-                WHERE op.order_id=" . $_GET['id'];
+                WHERE op.order_id=?";
     $stmt = $conn->prepare($sql);
+    $stmt->bindParam(1,$_GET['id'],PDO::PARAM_INT);
     $stmt->execute();
     $rows = $stmt->fetchAll();
 
     $query = "SELECT SUM(p.price) as total from products p 
                     INNER JOIN order_product op ON p.id=op.product_id 
-                    WHERE op.order_id=" . $_GET['id'];
+                    WHERE op.order_id=?";
     $stm = $conn->prepare($query);
+    $stm->bindParam(1,$_GET['id'],PDO::PARAM_INT);
     $stm->execute();
     $totals = $stm->fetchAll();
     foreach ($totals as $total) {
