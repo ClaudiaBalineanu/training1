@@ -1,6 +1,7 @@
 <?php
-//require_once 'config.php';
 require_once 'common.php';
+
+setcookie(session_name(), session_id(), time() + (30 * 60));
 
 if (isset($_SESSION['admin'])) {
     session_unset();
@@ -32,10 +33,7 @@ if (isset($_POST['submit'])) {
         if (ADMIN == $username && PASS == $password) {
             // set session admin with the password
             $_SESSION['admin'] = $password;
-            // get the time in seconds
-            $_SESSION['start'] = time();
-            // ending a session in 30 minutes from the starting time.
-            $_SESSION['expire'] = $_SESSION['start'] + (30 * 60);
+
             redirect('products.php');
         }
     } else {
