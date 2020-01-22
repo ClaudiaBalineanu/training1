@@ -54,7 +54,8 @@ if (isset($_POST['submit'])) {
     $subject = trans("Email checkout");
     $from = strip_tags($_POST['email']);
 
-    $message = '<html><head></head><body><table>';
+    $message = '<p>Name: ' . $name . '<br/>Email: ' . $email . '<br/>Comment: ' . $comment . '</p>';
+    $message .= '<html><head></head><body><table>';
     if (!empty($rows) && count($rows) > 0) {
         foreach ($rows as $row) {
             $message .= '<tr><td><img src="images/' . $row['image'] .
@@ -63,8 +64,6 @@ if (isset($_POST['submit'])) {
                 $row['description'] . '<br/>' .
                 $row['price'] . '<br/></td></tr>';
         }
-    } else {
-        echo $mess;
     }
     $message .= '</table></body></html>';
     // use wordwrap() if lines are longer than 70 characters
@@ -77,7 +76,7 @@ if (isset($_POST['submit'])) {
 
     if ($subject && $from && $message) {
         // need a mail server and i don't have one so i just set a variable with a string !!!
-        // $mail = mail(TO, $subject, $message, $headers);
+        //$mail = mail(TO, $subject, $message, $headers);
         $mail = "yes";
     }
 
@@ -90,8 +89,8 @@ if (isset($_POST['submit'])) {
         if (!empty($_SESSION['checkout'])) {
             $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?,?)";
             $smt = $conn->prepare($sqlQuery);
-            $smt->bindParam(1, $email, PDO::PARAM_STR, 50);
-            $smt->bindParam(2, $name, PDO::PARAM_STR, 50);
+            $smt->bindParam(1, $email, PDO::PARAM_STR);
+            $smt->bindParam(2, $name, PDO::PARAM_STR);
 
             if (count($smt->execute()) == 1) {
                 $lastId = $conn->lastInsertId();
@@ -105,6 +104,7 @@ if (isset($_POST['submit'])) {
             }
         }
     }
+
     if (isset($mail)) {
         unset($_SESSION['cart']);
         // or can be redirected to products page (index.php)
@@ -140,13 +140,13 @@ if (isset($_POST['submit'])) {
 <br/>
 <form method="post">
     <input type="text" name="name" placeholder="<?= trans('Name') ?>"
-           value="<?php echo isset($_POST['name']) ? $_POST['name'] : '' ?>"/>
-    <span class="error">* <?php echo isset($errors['name']) ? $errors['name'] : ''; ?></span><br/><br/>
+           value="<?= isset($_POST['name']) ? $_POST['name'] : '' ?>"/>
+    <span class="error">* <?= isset($errors['name']) ? $errors['name'] : ''; ?></span><br/><br/>
     <input type="email" name="email" placeholder="<?= trans('Email') ?>"
-           value="<?php echo isset($_POST['email']) ? $_POST['email'] : '' ?>"/>
-    <span class="error">* <?php echo isset($errors['email']) ? $errors['email'] : ''; ?></span><br/><br/>
+           value="<?= isset($_POST['email']) ? $_POST['email'] : '' ?>"/>
+    <span class="error">* <?= isset($errors['email']) ? $errors['email'] : ''; ?></span><br/><br/>
     <textarea name="comment" cols="20" rows="7"
-              placeholder="<?= trans('Comment') ?>"><?php echo isset($_POST['comment']) ? $_POST['comment'] : '' ?></textarea><br/><br/>
+              placeholder="<?= trans('Comment') ?>"><?= isset($_POST['comment']) ? $_POST['comment'] : '' ?></textarea><br/><br/>
     <input type="submit" name="submit" value="<?= trans('Checkout') ?>">
 </form>
 <a href="index.php"><?= trans('Go to products') ?></a>
