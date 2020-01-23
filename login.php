@@ -1,17 +1,14 @@
 <?php
 require_once 'common.php';
 
-setcookie(session_name(), session_id(), time() + (30 * 60));
-
+// for logout
 if (isset($_SESSION['admin'])) {
     unset($_SESSION['admin']);
-} else {
-    $_SESSION['admin'] = array();
 }
 
 if (isset($_POST['submit'])) {
 
-    $errors = array();
+    $errors = [];
 
     if (empty($_POST['username'])) {
         $errors[] = trans('Insert Username! ');
@@ -30,11 +27,9 @@ if (isset($_POST['submit'])) {
     }
 
     if (empty($errors)) {
-        if (ADMIN == $username && PASS == $password) {
             // set session admin with the password
-            $_SESSION['admin'] = PASS;
+            $_SESSION['admin'] = true;
             redirect('products.php');
-        }
     }
 }
 ?>
