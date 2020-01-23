@@ -1,89 +1,82 @@
 <?php
 require_once 'common.php';
 
-setcookie('admin', session_id(), time() + (30 * 60));
+if (!isset($_SESSION['admin']) && !$_SESSION['admin']) {
+    redirect('login.php');
+}
 
-if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
-    if (!isset($_SESSION['edit'])) {
-        $_SESSION['edit'] = array();
+if (isset($_GET['id'])) {
+    $_SESSION['edit'] = $_GET['id'];
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
+    $stmt->execute([$_GET['id']]);
+    $rows = $stmt->fetchAll();
+    foreach ($rows as $row) {
+        $_POST['title'] = $row['title'];
+        $_POST['description'] = $row['description'];
+        $_POST['price'] = $row['price'];
+        $_POST['image'] = $row['image'];
     }
+}
 
-    if (isset($_GET['id'])) {
-        $_SESSION['edit'][] = $_GET['id'];
-        $stmt = $conn->prepare("SELECT * FROM Products WHERE id=?");
-        $stmt->bindParam(1,$_GET['id'],PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll();
-        foreach ($rows as $row) {
-            $_POST['title'] = $row['title'];
-            $_POST['description'] = $row['description'];
-            $_POST['price'] = $row['price'];
-            $_POST['image'] = $row['image'];
+$errors = [];
+$title = $description = $price = $image = "";
+if (isset($_POST['submit'])) {
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        if (empty($_POST['title'])) {
+            $errors['title'] = trans("Title is required");
+        } else {
+            $title = strip_tags($_POST['title']);
+            // check if title only contains letters and whitespace
+            if (!preg_match("/^[a-zA-Z ]*$/", $title)) {
+                $errors['title'] = trans("Only letters and white space allowed");
+            }
         }
-    }
 
-    $errors = array();
-    $title = $description = $price = $image = "";
-    if (isset($_POST['submit'])) {
-        if ($_SERVER['REQUEST_METHOD'] == "POST") {
-            if (empty($_POST['title'])) {
-                $errors['title'] = trans("Title is required");
-            } else {
-                $title = strip_tags($_POST['title']);
-                // check if title only contains letters and whitespace
-                if (!preg_match("/^[a-zA-Z ]*$/", $title)) {
-                    $errors['title'] = trans("Only letters and white space allowed");
-                }
-            }
+        if (empty($_POST['description'])) {
+            $errors['description'] = trans("Description is required");
+        } else {
+            $description = strip_tags($_POST['description']);
+        }
 
-            if (empty($_POST['description'])) {
-                $errors['description'] = trans("Description is required");
-            } else {
-                $description = strip_tags($_POST['description']);
-            }
-
-            if (empty($_POST['price'])) {
-                $errors['price'] = trans("Price is required");
-            } else {
-                $price = strip_tags($_POST['price']);
-                // check if price contains double values
-                if (!preg_match("/^[0-9]*\.[0-9]+$/", $price)) {
-                    $errors['price'] = trans("Only numbers(double) value allowed");
-                }
+        if (empty($_POST['price'])) {
+            $errors['price'] = trans("Price is required");
+        } else {
+            $price = strip_tags($_POST['price']);
+            // check if price contains double values
+            if (!preg_match("/^[0-9]*\.[0-9]+$/", $price)) {
+                $errors['price'] = trans("Only numbers(double) value allowed");
             }
         }
 
         if (isset($_POST['image'])) {
+            // original uploaded name file
             $image = pathinfo($_FILES["browse"]["name"]);
+            // e.g. basename = 1.jpg
             $_POST['image'] = $image['basename'];
 
             $target_dir = "images/";
+            // e.g. filename = 1
             $target_file = $image['filename'];
-            $imageFileType = strtolower(pathinfo($_FILES["browse"]["name"], PATHINFO_EXTENSION));
+            // e.g. extension = jpg
+            $imageFileType = $image['extension'];
             $uniq = uniqid() . '.' . $imageFileType;
-
-            if (move_uploaded_file($_FILES['browse']['tmp_name'], $target_dir . $uniq)) {
-                if (isset($_SESSION['edit']) && !empty($_SESSION['edit'])) {
-                    $stmt = $conn->prepare("UPDATE Products SET title=?, description=?, price=?, image=? WHERE id=?");
-                    $stmt->bindParam(1,$title,PDO::PARAM_STR);
-                    $stmt->bindParam(2,$description,PDO::PARAM_STR);
-                    $stmt->bindParam(3,$price,PDO::PARAM_STR);
-                    $stmt->bindParam(4,$uniq,PDO::PARAM_STR);
-                    $stmt->bindParam(5,$_SESSION['edit'][0],PDO::PARAM_INT);
+            if (empty($errors)) {
+                // temporary file name on server
+                if (move_uploaded_file($_FILES['browse']['tmp_name'], $target_dir . $uniq)) {
+                    if (isset($_SESSION['edit']) && !empty($_SESSION['edit'])) {
+                        $stmt = $conn->prepare("UPDATE products SET title = ?, description = ?, price = ?, image = ? WHERE id = ?");
+                        $stmt->execute([$title, $description, $price, $uniq, $_SESSION['edit']]);
+                    } else {
+                        $stmt = $conn->prepare("INSERT INTO products(title, description, price, image) VALUES(?, ?, ?, ?)");
+                        $stmt->execute([$title, $description, $price, $uniq]);
+                    }
+                    unset($_SESSION['edit']);
                 } else {
-                    $stmt = $conn->prepare("INSERT INTO Products(title, description, price, image) VALUES(?, ?, ?, ?)");
-                    $stmt->bindParam(1,$title,PDO::PARAM_STR);
-                    $stmt->bindParam(2,$description,PDO::PARAM_STR);
-                    $stmt->bindParam(3,$price,PDO::PARAM_STR);
-                    $stmt->bindParam(4,$uniq,PDO::PARAM_STR);
+                    $errors['fail'] = trans("Select image!");
                 }
-                $stmt->execute();
-                unset($_SESSION['edit']);
             }
         }
     }
-} else {
-    redirect('login.php');
 }
 ?>
 <html>
@@ -108,6 +101,7 @@ if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
     <input type="text" name="image" placeholder="<?= trans('Image') ?>"
            value="<?= isset($_POST['image']) ? $_POST['image'] : '' ?>"/>
     <input type="file" name="browse" id="browse" value="<?= trans('Browse') ?>"><br/><br/>
+    <span class="error"><?= isset($errors['fail']) ? $errors['fail'] : ''; ?></span><br/>
     <a href="products.php"><?= trans('Products') ?></a>
     <input type="submit" name="submit" value="<?= trans('Save') ?>">
 </form>
