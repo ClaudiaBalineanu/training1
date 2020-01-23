@@ -1,22 +1,19 @@
 <?php
 require_once 'common.php';
 
-setcookie(session_name(), session_id(), time() + (30 * 60));
-
-if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
-    if (isset($_GET['id'])) {
-        $stmt = $conn->prepare("DELETE FROM Products WHERE id=?");
-        $stmt->bindParam(1,$_GET['id'],PDO::PARAM_INT);
-        $stmt->execute(array($_GET['id']));
-        //when delete to refresh the page
-        redirect('products.php');
-    }
-    $stmt = $conn->prepare("SELECT * FROM Products");
-    $stmt->execute();
-    $rows = $stmt->fetchAll();
-} else {
+if (!isset($_SESSION['admin']) && !$_SESSION['admin']) {
     redirect('login.php');
 }
+
+if (isset($_GET['id'])) {
+    $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+    $stmt->execute([$_GET['id']]);
+    //when delete to refresh the page
+    redirect('products.php');
+}
+$stmt = $conn->prepare("SELECT * FROM products");
+$stmt->execute();
+$rows = $stmt->fetchAll();
 ?>
 <html>
 <head></head>
@@ -47,5 +44,6 @@ if (isset($_SESSION['admin']) && $_SESSION['admin'] == PASS) {
 </table>
 <a href="product.php"><?= trans('Add') ?></a>
 <a href="login.php"><?= trans('Logout') ?></a>
+<a href="orders.php"><?= trans('Orders') ?></a>
 </body>
 </html>
