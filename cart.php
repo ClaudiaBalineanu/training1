@@ -1,21 +1,21 @@
 <?php
 require_once 'common.php';
+
 if (isset($_SESSION['cart'])) {
     if (count($_SESSION['cart'])) {
         if (isset($_GET['id'])) {
             $keySession = array_search($_GET['id'], $_SESSION['cart']);
             if (isset($keySession)) {
                 unset($_SESSION['cart'][$keySession]);
-                // remake the session array (if unset 2=>2, the 3=>3 will become 2=>3)
-                $_SESSION['cart'] = array_values($_SESSION['cart']);
             }
             redirect('cart.php');
         }
         if (!empty($_SESSION['cart'])) {
             $arr = array_fill(0, count($_SESSION['cart']), '?');
             $qMarks = implode(',', $arr);
-            $stmt = $conn->prepare("SELECT * FROM  Products WHERE id IN($qMarks)");
-            $stmt->execute($_SESSION['cart']);
+            $stmt = $conn->prepare("SELECT * FROM  products WHERE id IN($qMarks)");
+            // reindexing the cart with array_values
+            $stmt->execute(array_values($_SESSION['cart']));
             $rows = $stmt->fetchAll();
         }
     } else {
@@ -25,7 +25,7 @@ if (isset($_SESSION['cart'])) {
     $mess = trans('Successful checkout!');
 }
 
-$errors = array();
+$errors = [];
 $name = $email = $comment = "";
 $message = "";
 
@@ -54,11 +54,15 @@ if (isset($_POST['submit'])) {
     $subject = trans("Email checkout");
     $from = strip_tags($_POST['email']);
 
-    $message = '<p>Name: ' . $name . '<br/>Email: ' . $email . '<br/>Comment: ' . $comment . '</p>';
+    // get the protocol in lower case; strpos() find the numeric position of the first occurrence of '/' in the string.
+    $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"], 0, strpos($_SERVER["SERVER_PROTOCOL"], '/')));
+    $message = '<p>' . trans('Name: ') . $name . '<br/>'
+        . trans('Email: ') . $email . '<br/>'
+        . trans('Comment: ') . $comment . '</p>';
     $message .= '<html><head></head><body><table>';
     if (!empty($rows) && count($rows) > 0) {
         foreach ($rows as $row) {
-            $message .= '<tr><td><img src="images/' . $row['image'] .
+            $message .= '<tr><td><img src="' . $protocol . '://' . $_SERVER['HTTP_HOST'] . '/images/' . $row['image'] .
                 '" width="100" height="100" alt="' . trans('Image product') . '"></td>';
             $message .= '<td>' . $row['title'] . '<br/>' .
                 $row['description'] . '<br/>' .
@@ -80,26 +84,16 @@ if (isset($_POST['submit'])) {
         $mail = "yes";
     }
 
-    if (!isset($_SESSION['checkout'])) {
-        $_SESSION['checkout'] = array();
-    }
-
-    $_SESSION['checkout'] = $_SESSION['cart'];
     if (!isset($errors['name']) && !isset($errors['email'])) {
-        if (!empty($_SESSION['checkout'])) {
-            $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?,?)";
+        if (!empty($_SESSION['cart'])) {
+            $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
             $smt = $conn->prepare($sqlQuery);
-            $smt->bindParam(1, $email, PDO::PARAM_STR);
-            $smt->bindParam(2, $name, PDO::PARAM_STR);
-
-            if (count($smt->execute()) == 1) {
+            if (count($smt->execute([$email, $name])) == 1) {
                 $lastId = $conn->lastInsertId();
-                foreach ($_SESSION['checkout'] as $id) {
-                    $query = "INSERT INTO order_product(order_id, product_id) VALUES(?,?)";
+                foreach ($_SESSION['cart'] as $id) {
+                    $query = "INSERT INTO order_product(order_id, product_id) VALUES(?, ?)";
                     $stm = $conn->prepare($query);
-                    $stm->bindParam(1, $lastId, PDO::PARAM_INT);
-                    $stm->bindParam(2, $id, PDO::PARAM_INT);
-                    $stm->execute();
+                    $stm->execute([$lastId, $id]);
                 }
             }
         }
