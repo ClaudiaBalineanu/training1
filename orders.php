@@ -1,9 +1,14 @@
 <?php
 require_once 'common.php';
 
-$sql = "SELECT o.id, o.name_cust, o.email, SUM(p.price) as total FROM products p 
-            INNER JOIN order_product op ON p.id=op.product_id 
-            INNER JOIN orders o ON op.order_id=o.id 
+if (!isset($_SESSION['admin']) && !$_SESSION['admin']) {
+    redirect('login.php');
+}
+
+$sql = "SELECT o.id, o.name_cust, o.email, SUM(p.price) as total 
+            FROM products p 
+            INNER JOIN order_product op ON p.id = op.product_id 
+            INNER JOIN orders o ON op.order_id = o.id 
             GROUP BY o.id";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
