@@ -3,7 +3,7 @@
 require_once 'common.php';
 
 if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = array();
+    $_SESSION['cart'] = [];
 }
 
 // if is already in the session, don't insert again
@@ -14,12 +14,11 @@ if (isset($_GET['id']) && !in_array($_GET['id'], $_SESSION['cart'])) {
 
 if (!count($_SESSION['cart'])) {
     // prepare a query for selecting the products on the database
-    $stmt = $conn->prepare("SELECT * FROM Products");
+    $stmt = $conn->prepare("SELECT * FROM products");
 } else {
     $arr = array_fill(0, count($_SESSION['cart']), '?');
     $qMarks = implode(',', $arr);
-    $sql = "SELECT * FROM Products WHERE id NOT IN($qMarks)";
-    $stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id NOT IN($qMarks)");
 }
 $stmt->execute($_SESSION['cart']);
 $rows = $stmt->fetchAll();
