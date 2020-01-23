@@ -72,7 +72,7 @@ if (isset($_POST['submit'])) {
                     }
                     unset($_SESSION['edit']);
                 } else {
-                    $errors['fail'] = trans("Select image!");
+                    $errors['image'] = trans("Select image!");
                 }
             }
         }
@@ -101,7 +101,7 @@ if (isset($_POST['submit'])) {
     <input type="text" name="image" placeholder="<?= trans('Image') ?>"
            value="<?= isset($_POST['image']) ? $_POST['image'] : '' ?>"/>
     <input type="file" name="browse" id="browse" value="<?= trans('Browse') ?>"><br/><br/>
-    <span class="error"><?= isset($errors['fail']) ? $errors['fail'] : ''; ?></span><br/>
+    <span class="error"><?= isset($errors['image']) ? $errors['image'] : ''; ?></span><br/>
     <a href="products.php"><?= trans('Products') ?></a>
     <input type="submit" name="submit" value="<?= trans('Save') ?>">
 </form>
