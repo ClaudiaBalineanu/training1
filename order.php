@@ -1,25 +1,26 @@
 <?php
 require_once 'common.php';
 
+if (!isset($_SESSION['admin']) && !$_SESSION['admin']) {
+    redirect('login.php');
+}
+
 if (isset($_GET['id'])) {
-    $sql = "SELECT op.order_id, o.name_cust, o.email, op.product_id, p.id, p.title, p.description, p.price, p.image FROM products p 
-                INNER JOIN order_product op ON p.id=op.product_id 
-                INNER JOIN orders o ON op.order_id=o.id 
-                WHERE op.order_id=?";
+    $sql = "SELECT o.id, o.name_cust, o.email FROM orders o WHERE o.id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(1,$_GET['id'],PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt->execute([$_GET['id']]);
     $rows = $stmt->fetchAll();
 
-    $query = "SELECT SUM(p.price) as total from products p 
-                    INNER JOIN order_product op ON p.id=op.product_id 
-                    WHERE op.order_id=?";
+    $query = "SELECT p.title, p.description, p.price, p.image
+                    FROM products p 
+                    INNER JOIN order_product op ON p.id = op.product_id 
+                    WHERE op.order_id = ?";
     $stm = $conn->prepare($query);
-    $stm->bindParam(1,$_GET['id'],PDO::PARAM_INT);
-    $stm->execute();
+    $stm->execute([$_GET['id']]);
     $totals = $stm->fetchAll();
+    $sum=0;
     foreach ($totals as $total) {
-        $total['total'];
+        $sum += $total['price'];
     }
 }
 ?>
@@ -38,14 +39,12 @@ if (isset($_GET['id'])) {
         <td><?= trans('Order id') ?></td>
         <td><?= trans('Customer name') ?></td>
         <td><?= trans('Customer email') ?></td>
-        <td><?= trans('Product id') ?></td>
-        <td><?= trans('Product name') ?></td>
     </tr>
     <?php if (count($rows) > 0): ?>
         <?php foreach ($rows as $row): ?>
             <tr>
                 <td>
-                    <?= $row['order_id'] ?> <br/>
+                    <?= $row['id'] ?> <br/>
                 </td>
                 <td>
                     <?= $row['name_cust'] ?> <br/>
@@ -53,30 +52,24 @@ if (isset($_GET['id'])) {
                 <td>
                     <?= $row['email'] ?> <br/>
                 </td>
-                <td>
-                    <?= $row['product_id'] ?> <br/>
-                </td>
-                <td>
-                    <?= $row['title'] ?> <br/>
-                </td>
             </tr>
         <?php endforeach; ?>
-        <th colspan="5"><?= trans('Total') ?>:<?= $total['total']; ?></th>
+        <th colspan="3"><?= trans('Total') ?>:<?= $sum; ?></th>
     <?php else: ?>
         <?= trans('No data') ?>
     <?php endif; ?>
 </table>
 <h3><?= trans('Products details') ?></h3>
 <table>
-    <?php foreach ($rows as $row): ?>
+    <?php foreach ($totals as $total): ?>
         <tr>
             <td>
-                <img src="images/<?= $row['image'] ?>" width="100" height="100" alt="<?= trans('Image product') ?>">
+                <img src="images/<?= $total['image'] ?>" width="100" height="100" alt="<?= trans('Image product') ?>">
             </td>
             <td>
-                <?= $row['title'] ?> <br/>
-                <?= $row['description'] ?> <br/>
-                <?= $row['price'] ?> <br/>
+                <?= $total['title'] ?> <br/>
+                <?= $total['description'] ?> <br/>
+                <?= $total['price'] ?> <br/>
             </td>
         </tr>
     <?php endforeach; ?>
