@@ -49,11 +49,11 @@ if (isset($_POST['submit'])) {
             }
         }
 
-        if (empty($_FILES["browse"]["name"])) {
+        if (empty($_FILES['browse']['name'])) {
             $errors['image'] = trans("Select image!");
         } else {
             // original uploaded name file
-            $image = pathinfo($_FILES["browse"]["name"]);
+            $image = pathinfo($_FILES['browse']['name']);
             // e.g. basename = 1.jpg
             $_POST['image'] = $image['basename'];
 
