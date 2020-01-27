@@ -31,34 +31,34 @@ $message = "";
 
 if (isset($_POST['submit'])) {
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        if (empty($_POST["name"])) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if (empty($_POST['name'])) {
             $errors['name'] = trans('Name is required');
         } else {
-            $name = strip_tags($_POST["name"]);
+            $name = strip_tags($_POST['name']);
         }
 
-        if (empty($_POST["email"])) {
+        if (empty($_POST['email'])) {
             $errors['email'] = trans('Email is required');
         } else {
-            $email = strip_tags($_POST["email"]);
+            $email = strip_tags($_POST['email']);
         }
 
-        if (empty($_POST["comment"])) {
+        if (empty($_POST['comment'])) {
             $comment = "";
         } else {
-            $comment = strip_tags($_POST["comment"]);
+            $comment = strip_tags($_POST['comment']);
         }
     }
 
-    $subject = trans("Email checkout");
+    $subject = trans('Email checkout');
     $from = strip_tags($_POST['email']);
 
-    // get the protocol in lower case; strpos() find the numeric position of the first occurrence of '/' in the string.
-    $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"], 0, strpos($_SERVER["SERVER_PROTOCOL"], '/')));
-    $message = '<p>' . trans('Name: ') . $name . '<br/>'
-        . trans('Email: ') . $email . '<br/>'
-        . trans('Comment: ') . $comment . '</p>';
+    $protocol = isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off' || $_SERVER['HTTPS'] == 1) ? 'https' : 'http';
+
+    $message = '<p>' . trans('Name') . ': ' . $name . '<br/>'
+        . trans('Email') . ': ' . $email . '<br/>'
+        . trans('Comment') . ': ' . $comment . '</p>';
     $message .= '<html><head></head><body><table>';
     if (!empty($rows) && count($rows) > 0) {
         foreach ($rows as $row) {
@@ -70,39 +70,33 @@ if (isset($_POST['submit'])) {
         }
     }
     $message .= '</table></body></html>';
-    // use wordwrap() if lines are longer than 70 characters
-    $message = wordwrap($message, 70);
-
+    // wordwrap() if lines are longer than 70 characters
+    $message = wordwrap($message, 70, "\r\n", false);
+echo $message; die();
     // set content-type when sending HTML email
     $headers = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= 'From: ' . $from . "\r\n";
-
-    if ($subject && $from && $message) {
-        // need a mail server and i don't have one so i just set a variable with a string !!!
-        //$mail = mail(TO, $subject, $message, $headers);
-        $mail = "yes";
-    }
+    $headers .= "From: " . $from . "\r\n";
 
     if (!isset($errors['name']) && !isset($errors['email'])) {
-        if (!empty($_SESSION['cart'])) {
-            $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
-            $smt = $conn->prepare($sqlQuery);
-            if (count($smt->execute([$email, $name])) == 1) {
-                $lastId = $conn->lastInsertId();
-                foreach ($_SESSION['cart'] as $id) {
-                    $query = "INSERT INTO order_product(order_id, product_id) VALUES(?, ?)";
-                    $stm = $conn->prepare($query);
-                    $stm->execute([$lastId, $id]);
+        if ($subject && $from && $message) {
+            // need a mail server
+            //$mail = mail(TO, $subject, $message, $headers);
+            if (!empty($_SESSION['cart'])) {
+                $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
+                $smt = $conn->prepare($sqlQuery);
+                if (count($smt->execute([$email, $name])) == 1) {
+                    $lastId = $conn->lastInsertId();
+                    foreach ($_SESSION['cart'] as $id) {
+                        $query = "INSERT INTO order_product(order_id, product_id) VALUES(?, ?)";
+                        $stm = $conn->prepare($query);
+                        $stm->execute([$lastId, $id]);
+                    }
                 }
             }
+            unset($_SESSION['cart']);
+            redirect('cart.php');
         }
-    }
-
-    if (isset($mail)) {
-        unset($_SESSION['cart']);
-        // or can be redirected to products page (index.php)
-        redirect('cart.php');
     }
 }
 ?>
