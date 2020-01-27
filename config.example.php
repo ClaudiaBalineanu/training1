@@ -13,3 +13,5 @@ define("TO", "");
 define("ADMIN", "");
 // keep the admin password
 define("PASS", "");
+// the director where the file (image) to be saved
+define("TARGET_DIR", "");

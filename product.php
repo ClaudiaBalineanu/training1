@@ -1,6 +1,7 @@
 <?php
 require_once 'common.php';
 
+// if not login, redirect login page
 if (!isset($_SESSION['admin']) && !$_SESSION['admin']) {
     redirect('login.php');
 }
@@ -48,13 +49,14 @@ if (isset($_POST['submit'])) {
             }
         }
 
-        if (isset($_POST['image'])) {
+        if (empty($_FILES["browse"]["name"])) {
+            $errors['image'] = trans("Select image!");
+        } else {
             // original uploaded name file
             $image = pathinfo($_FILES["browse"]["name"]);
             // e.g. basename = 1.jpg
             $_POST['image'] = $image['basename'];
 
-            $target_dir = "images/";
             // e.g. filename = 1
             $target_file = $image['filename'];
             // e.g. extension = jpg
@@ -62,8 +64,8 @@ if (isset($_POST['submit'])) {
             $uniq = uniqid() . '.' . $imageFileType;
             if (empty($errors)) {
                 // temporary file name on server
-                if (move_uploaded_file($_FILES['browse']['tmp_name'], $target_dir . $uniq)) {
-                    if (isset($_SESSION['edit']) && !empty($_SESSION['edit'])) {
+                if (move_uploaded_file($_FILES['browse']['tmp_name'], TARGET_DIR . $uniq)) {
+                    if (isset($_SESSION['edit'])) {
                         $stmt = $conn->prepare("UPDATE products SET title = ?, description = ?, price = ?, image = ? WHERE id = ?");
                         $stmt->execute([$title, $description, $price, $uniq, $_SESSION['edit']]);
                     } else {
@@ -71,8 +73,6 @@ if (isset($_POST['submit'])) {
                         $stmt->execute([$title, $description, $price, $uniq]);
                     }
                     unset($_SESSION['edit']);
-                } else {
-                    $errors['image'] = trans("Select image!");
                 }
             }
         }
