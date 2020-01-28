@@ -59,7 +59,7 @@ if (isset($_POST['submit'])) {
     $message = '<p>' . trans('Name') . ': ' . $name . '<br/>'
         . trans('Email') . ': ' . $email . '<br/>'
         . trans('Comment') . ': ' . $comment . '</p>';
-    $message .= '<html><head></head><body><table>';
+    $message .= '<html><head></head><body> <table>';
     if (!empty($rows) && count($rows) > 0) {
         foreach ($rows as $row) {
             $message .= '<tr><td><img src="' . $protocol . '://' . $_SERVER['HTTP_HOST'] . '/images/' . $row['image'] .
@@ -71,7 +71,7 @@ if (isset($_POST['submit'])) {
     }
     $message .= '</table></body></html>';
     // wordwrap() if lines are longer than 70 characters
-    $message = wordwrap($message, 70, "\r\n", false);
+    $message = wordwrap($message, 70, "\r\n", true);
 
     // set content-type when sending HTML email
     $headers = "MIME-Version: 1.0" . "\r\n";
