@@ -59,7 +59,6 @@ if (isset($_POST['submit'])) {
                         $stmt = $conn->prepare("INSERT INTO products(title, description, price, image) VALUES(?, ?, ?, ?)");
                         $stmt->execute([$title, $description, $price, $uniq]);
                     }
-                    unset($_GET['id']);
                 }
             }
         }
