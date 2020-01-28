@@ -79,21 +79,24 @@ if (isset($_POST['submit'])) {
     $headers .= "From: " . $from . "\r\n";
 
     if (!isset($errors['name']) && !isset($errors['email'])) {
-        if ($subject && $from && $message) {
-            // need a mail server
-            //$mail = mail(TO, $subject, $message, $headers);
-            if (!empty($_SESSION['cart'])) {
-                $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
-                $smt = $conn->prepare($sqlQuery);
-                if (count($smt->execute([$email, $name])) == 1) {
-                    $lastId = $conn->lastInsertId();
-                    foreach ($_SESSION['cart'] as $id) {
-                        $query = "INSERT INTO order_product(order_id, product_id) VALUES(?, ?)";
-                        $stm = $conn->prepare($query);
-                        $stm->execute([$lastId, $id]);
-                    }
+        if (!empty($_SESSION['cart'])) {
+            if ($subject && $from && $message) {
+                // need a mail server
+                //$mail = mail(TO, $subject, $message, $headers);
+                echo "mail"; die();
+            }
+
+            $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
+            $smt = $conn->prepare($sqlQuery);
+            if (count($smt->execute([$email, $name])) == 1) {
+                $lastId = $conn->lastInsertId();
+                foreach ($_SESSION['cart'] as $id) {
+                    $query = "INSERT INTO order_product(order_id, product_id) VALUES(?, ?)";
+                    $stm = $conn->prepare($query);
+                    $stm->execute([$lastId, $id]);
                 }
             }
+
             unset($_SESSION['cart']);
             redirect('cart.php');
         }
