@@ -6,19 +6,6 @@ if (!isset($_SESSION['admin']) && !$_SESSION['admin']) {
     redirect('login.php');
 }
 
-if (isset($_GET['id'])) {
-    $_SESSION['edit'] = $_GET['id'];
-    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
-    $stmt->execute([$_GET['id']]);
-    $rows = $stmt->fetchAll();
-    foreach ($rows as $row) {
-        $_POST['title'] = $row['title'];
-        $_POST['description'] = $row['description'];
-        $_POST['price'] = $row['price'];
-        $_POST['image'] = $row['image'];
-    }
-}
-
 $errors = [];
 $title = $description = $price = $image = "";
 if (isset($_POST['submit'])) {
@@ -65,17 +52,30 @@ if (isset($_POST['submit'])) {
             if (empty($errors)) {
                 // temporary file name on server
                 if (move_uploaded_file($_FILES['browse']['tmp_name'], TARGET_DIR . $uniq)) {
-                    if (isset($_SESSION['edit'])) {
+                    if (isset($_GET['id'])) {
                         $stmt = $conn->prepare("UPDATE products SET title = ?, description = ?, price = ?, image = ? WHERE id = ?");
-                        $stmt->execute([$title, $description, $price, $uniq, $_SESSION['edit']]);
+                        $stmt->execute([$title, $description, $price, $uniq, $_GET['id']]);
                     } else {
                         $stmt = $conn->prepare("INSERT INTO products(title, description, price, image) VALUES(?, ?, ?, ?)");
                         $stmt->execute([$title, $description, $price, $uniq]);
                     }
-                    unset($_SESSION['edit']);
+                    unset($_GET['id']);
                 }
             }
         }
+    }
+}
+
+if (isset($_GET['id'])) {
+    //$_SESSION['edit'] = $_GET['id'];
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
+    $stmt->execute([$_GET['id']]);
+    $rows = $stmt->fetchAll();
+    foreach ($rows as $row) {
+        $_POST['title'] = $row['title'];
+        $_POST['description'] = $row['description'];
+        $_POST['price'] = $row['price'];
+        $_POST['image'] = $row['image'];
     }
 }
 ?>
@@ -88,7 +88,7 @@ if (isset($_POST['submit'])) {
     </style>
 </head>
 <body>
-<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
+<form method="post"  enctype="multipart/form-data">
     <input type="text" name="title" placeholder="<?= trans('Title') ?>"
            value="<?= isset($_POST['title']) ? $_POST['title'] : '' ?>"/>*<br/>
     <span class="error"><?= isset($errors['title']) ? $errors['title'] : ''; ?></span><br/>
