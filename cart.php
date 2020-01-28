@@ -82,8 +82,7 @@ if (isset($_POST['submit'])) {
         if (!empty($_SESSION['cart'])) {
             if ($subject && $from && $message) {
                 // need a mail server
-                //$mail = mail(TO, $subject, $message, $headers);
-                echo "mail"; die();
+                $mail = mail(TO, $subject, $message, $headers);
             }
 
             $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
