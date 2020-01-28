@@ -67,7 +67,6 @@ if (isset($_POST['submit'])) {
 }
 
 if (isset($_GET['id'])) {
-    //$_SESSION['edit'] = $_GET['id'];
     $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
     $stmt->execute([$_GET['id']]);
     $rows = $stmt->fetchAll();
