@@ -54,7 +54,7 @@ if (isset($_POST['submit'])) {
     $subject = trans('Email checkout');
     $from = strip_tags($_POST['email']);
 
-    $protocol = isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off' || $_SERVER['HTTPS'] == 1) ? 'https' : 'http';
+    $protocol = isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) &&  $_SERVER['HTTPS'] == 1 ? 'https' : 'http';
 
     $message = '<p>' . trans('Name') . ': ' . $name . '<br/>'
         . trans('Email') . ': ' . $email . '<br/>'
