@@ -39,16 +39,8 @@ if (isset($_POST['submit'])) {
         if (empty($_FILES['browse']['name'])) {
             $errors['image'] = trans("Select image!");
         } else {
-            // original uploaded name file
-            $image = pathinfo($_FILES['browse']['name']);
-            // e.g. basename = 1.jpg
-            $_POST['image'] = $image['basename'];
-
-            // e.g. filename = 1
-            $target_file = $image['filename'];
-            // e.g. extension = jpg
-            $imageFileType = $image['extension'];
-            $uniq = uniqid() . '.' . $imageFileType;
+            $_POST['image'] = $_FILES['browse']['name'];
+            $uniq = uniqid() . '.' . pathinfo($_FILES['browse']['name'], PATHINFO_EXTENSION);
             if (empty($errors)) {
                 // temporary file name on server
                 if (move_uploaded_file($_FILES['browse']['tmp_name'], TARGET_DIR . $uniq)) {
