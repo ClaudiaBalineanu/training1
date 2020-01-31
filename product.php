@@ -60,15 +60,15 @@ if (isset($_POST['submit'])) {
             }
         }
     }
-}
-
-if (isset($_GET['id'])) {
-    $stmt = $conn->prepare("SELECT title, description, price FROM products WHERE id = ?");
-    $stmt->execute([$_GET['id']]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $title = $row['title'];
-    $description = $row['description'];
-    $price = $row['price'];
+} else {
+    if (isset($_GET['id'])) {
+        $stmt = $conn->prepare("SELECT title, description, price FROM products WHERE id = ?");
+        $stmt->execute([$_GET['id']]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $title = $row['title'];
+        $description = $row['description'];
+        $price = $row['price'];
+    }
 }
 ?>
 <html>
