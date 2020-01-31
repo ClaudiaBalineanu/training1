@@ -80,8 +80,9 @@ if (isset($_POST['submit'])) {
             $headers = "MIME-Version: 1.0" . "\r\n";
             $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
             $headers .= "From: " . $from . "\r\n";
-                // need a mail server
-                $mail = mail(TO, $subject, $message, $headers);
+
+            // need a mail server
+            $mail = mail(TO, $subject, $message, $headers);
 
             $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
             $smt = $conn->prepare($sqlQuery);
