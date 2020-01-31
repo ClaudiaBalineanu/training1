@@ -72,7 +72,6 @@ if (isset($_POST['submit'])) {
                 }
             }
             $message .= '</table></body></html>';
-            //$message = str_replace("\n.", "\n..", $message);
             // wordwrap() if lines are longer than 70 characters
             $message = wordwrap($message, 70, "\r\n", true);
 
