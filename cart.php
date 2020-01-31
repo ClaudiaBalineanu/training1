@@ -72,8 +72,6 @@ if (isset($_POST['submit'])) {
                 }
             }
             $message .= '</table></body></html>';
-            // wordwrap() if lines are longer than 70 characters
-            $message = wordwrap($message, 70, "\r\n", true);
 
             // set content-type when sending HTML email
             $headers = "MIME-Version: 1.0" . "\r\n";
