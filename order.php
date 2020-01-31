@@ -17,10 +17,10 @@ if (isset($_GET['id'])) {
                     WHERE op.order_id = ?";
     $stm = $conn->prepare($query);
     $stm->execute([$_GET['id']]);
-    $totals = $stm->fetchAll();
+    $products = $stm->fetchAll();
     $sum=0;
-    foreach ($totals as $total) {
-        $sum += $total['price'];
+    foreach ($products as $product) {
+        $sum += $product['price'];
     }
 }
 ?>
@@ -61,15 +61,15 @@ if (isset($_GET['id'])) {
 </table>
 <h3><?= trans('Products details') ?></h3>
 <table>
-    <?php foreach ($totals as $total): ?>
+    <?php foreach ($products as $product): ?>
         <tr>
             <td>
-                <img src="images/<?= $total['image'] ?>" width="100" height="100" alt="<?= trans('Image product') ?>">
+                <img src="images/<?= $product['image'] ?>" width="100" height="100" alt="<?= trans('Image product') ?>">
             </td>
             <td>
-                <?= $total['title'] ?> <br/>
-                <?= $total['description'] ?> <br/>
-                <?= $total['price'] ?> <br/>
+                <?= $product['title'] ?> <br/>
+                <?= $product['description'] ?> <br/>
+                <?= $product['price'] ?> <br/>
             </td>
         </tr>
     <?php endforeach; ?>
