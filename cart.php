@@ -51,39 +51,39 @@ if (isset($_POST['submit'])) {
         }
     }
 
-    $subject = trans('Email checkout');
-    $from = strip_tags($_POST['email']);
-
-    $protocol = isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) &&  $_SERVER['HTTPS'] == 1 ? 'https' : 'http';
-
-    $message = '<p>' . trans('Name') . ': ' . $name . '<br/>'
-        . trans('Email') . ': ' . $email . '<br/>'
-        . trans('Comment') . ': ' . $comment . '</p>';
-    $message .= '<html><head></head><body> <table>';
-    if (!empty($rows) && count($rows) > 0) {
-        foreach ($rows as $row) {
-            $message .= '<tr><td><img src="' . $protocol . '://' . $_SERVER['HTTP_HOST'] . '/images/' . $row['image'] .
-                '" width="100" height="100" alt="' . trans('Image product') . '"></td>';
-            $message .= '<td>' . $row['title'] . '<br/>' .
-                $row['description'] . '<br/>' .
-                $row['price'] . '<br/></td></tr>';
-        }
-    }
-    $message .= '</table></body></html>';
-    // wordwrap() if lines are longer than 70 characters
-    $message = wordwrap($message, 70, "\r\n", true);
-
-    // set content-type when sending HTML email
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: " . $from . "\r\n";
-
     if (!isset($errors['name']) && !isset($errors['email'])) {
         if (!empty($_SESSION['cart'])) {
-            if ($subject && $from && $message) {
+            $subject = trans('Email checkout');
+            $from = strip_tags($_POST['email']);
+
+            $protocol = isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) &&  $_SERVER['HTTPS'] == 1 ? 'https' : 'http';
+
+            $message = '<html><head></head><body>';
+            $message .= '<p>' . trans('Name') . ': ' . $name . '<br/>'
+                . trans('Email') . ': ' . $email . '<br/>'
+                . trans('Comment') . ': ' . $comment . '</p><table>';
+            if (!empty($rows) && count($rows) > 0) {
+                foreach ($rows as $row) {
+                    $message .= '<tr><td><img src="' . $protocol . '://' . $_SERVER['HTTP_HOST'] . '/images/' . $row['image'] .
+                        '" width="100" height="100" alt="' . trans('Image product') . '"></td>';
+                    $message .= '<td>' . $row['title'] . '<br/>' .
+                        $row['description'] . '<br/>' .
+                        $row['price'] . '<br/></td></tr>';
+                }
+            }
+            $message .= '</table></body></html>';
+            //$message = str_replace("\n.", "\n..", $message);
+            // wordwrap() if lines are longer than 70 characters
+            $message = wordwrap($message, 70, "\r\n", true);
+
+            echo $message; exit();
+
+            // set content-type when sending HTML email
+            $headers = "MIME-Version: 1.0" . "\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+            $headers .= "From: " . $from . "\r\n";
                 // need a mail server
                 $mail = mail(TO, $subject, $message, $headers);
-            }
 
             $sqlQuery = "INSERT INTO orders(email, name_cust) VALUES(?, ?)";
             $smt = $conn->prepare($sqlQuery);
@@ -98,6 +98,8 @@ if (isset($_POST['submit'])) {
 
             unset($_SESSION['cart']);
             redirect('cart.php');
+        } else {
+            $mess = trans("Cart can't be empty");
         }
     }
 }
