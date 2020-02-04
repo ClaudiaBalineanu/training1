@@ -41,13 +41,13 @@ if (isset($_POST['submit'])) {
 <p></p>
 <form method="post">
     <input type="text" name="name" placeholder="<?= trans('Name') ?>"
-           value="<?= isset($_POST['name']) ? $_POST['name'] : $name ?>"/>
+           value="<?= $name ?>"/>
     <span class="error">* <?= isset($errors['name']) ? $errors['name'] : ''; ?></span><br/><br/>
     <input type="email" name="email" placeholder="<?= trans('Email') ?>"
-           value="<?= isset($_POST['email']) ? $_POST['email'] : $email ?>"/>
+           value="<?= $email ?>"/>
     <span class="error">* <?= isset($errors['email']) ? $errors['email'] : ''; ?></span><br/><br/>
     <textarea name="comment" cols="20" rows="7"
-              placeholder="<?= trans('Comment') ?>"><?= isset($_POST['comment']) ? $_POST['comment'] : $comment ?></textarea><br/><br/>
+              placeholder="<?= trans('Comment') ?>"><?= $comment ?></textarea><br/><br/>
     <input type="submit" name="submit" value="<?= trans('Submit') ?>">
 </form>
 <a href="index.php"><?= trans('Go to products') ?></a>
