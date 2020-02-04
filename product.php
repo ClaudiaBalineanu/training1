@@ -82,13 +82,13 @@ if (isset($_POST['submit'])) {
 <body>
 <form method="post"  enctype="multipart/form-data">
     <input type="text" name="title" placeholder="<?= trans('Title') ?>"
-           value="<?= isset($_POST['title']) ? $_POST['title'] : $title ?>"/>*<br/>
+           value="<?= $title ?>"/>*<br/>
     <span class="error"><?= isset($errors['title']) ? $errors['title'] : ''; ?></span><br/>
     <input type="text" name="description" placeholder="<?= trans('Description') ?>"
-           value="<?= isset($_POST['description']) ? $_POST['description'] : $description ?>"/>*<br/>
+           value="<?= $description ?>"/>*<br/>
     <span class="error"><?= isset($errors['description']) ? $errors['description'] : ''; ?></span><br/>
     <input type="text" name="price" placeholder="<?= trans('Price') ?>"
-           value="<?= isset($_POST['price']) ? $_POST['price'] : $price ?>"/>*<br/>
+           value="<?= $price ?>"/>*<br/>
     <span class="error"><?= isset($errors['price']) ? $errors['price'] : ''; ?></span><br/>
     <input type="file" name="image" id="image" value="<?= trans('Browse') ?>"><br/><br/>
     <span class="error"><?= isset($errors['image']) ? $errors['image'] : ''; ?></span><br/>
